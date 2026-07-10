@@ -1,0 +1,1987 @@
+/* =========================================================
+   중국어 1000단어 퀴즈 - Calm Premium UI Clean Final Version
+   ---------------------------------------------------------
+   최종 정리 내용:
+   1. 누적된 결과 문구 보정 CSS를 전부 정리
+   2. "60초 동안 7문제를 맞혔습니다!" 문구 크기 축소
+   3. 결과 문구 안 숫자 7이 혼자 작거나 크게 보이지 않도록 통일
+   4. 기존 퀴즈 로직에는 영향 없이 UI 스타일만 정리
+   5. 모바일 / PC 모두 안정적으로 보이도록 반응형 유지
+   ========================================================= */
+
+
+/* =========================================================
+   1. 전역 변수
+   ========================================================= */
+:root {
+    /* 배경 */
+    --bg-base: #F7F0DF;
+    --bg-soft: #FFF9EC;
+
+    /* 표면 */
+    --surface: #FFFDF7;
+    --surface-soft: #FBF4E6;
+
+    /* 텍스트 */
+    --text-main: #2B2118;
+    --text-sub: #746858;
+    --text-muted: #9A8B76;
+
+    /* 메인 포인트 */
+    --primary: #9F2F2F;
+    --primary-dark: #7E2424;
+    --primary-soft: #F4DEDA;
+
+    /* 정답 색상: 너무 진하지 않은 세이지 그린 */
+    --success: #3F8B68;
+    --success-strong: #25684D;
+    --success-soft: #DCEFE4;
+    --success-bg: #EEF8F2;
+
+    /* 오답 색상: 자극적이지 않은 적갈색 */
+    --danger: #B85A52;
+    --danger-dark: #8B302C;
+    --danger-soft: #F2CFCB;
+    --danger-bg: #FFF4F2;
+
+    /* 카카오 */
+    --kakao: #F6D84A;
+    --kakao-text: #3A2D00;
+
+    /* 공통 */
+    --border-soft: rgba(84, 62, 35, 0.12);
+
+    --shadow-card:
+        0 18px 45px rgba(84, 62, 35, 0.10),
+        0 5px 14px rgba(84, 62, 35, 0.06);
+
+    --shadow-button:
+        0 8px 18px rgba(84, 62, 35, 0.08);
+
+    --radius-lg: 28px;
+    --radius-md: 18px;
+    --radius-pill: 999px;
+
+    --transition-fast: 160ms ease;
+}
+
+
+/* =========================================================
+   2. 기본 리셋
+   ========================================================= */
+* {
+    box-sizing: border-box;
+}
+
+html {
+    min-height: 100%;
+}
+
+body {
+    margin: 0;
+    min-height: 100vh;
+    min-height: 100dvh;
+    padding: 20px;
+
+    font-family:
+        'Malgun Gothic',
+        'Apple SD Gothic Neo',
+        system-ui,
+        -apple-system,
+        BlinkMacSystemFont,
+        sans-serif;
+
+    color: var(--text-main);
+
+    background:
+        radial-gradient(circle at top left, rgba(159, 47, 47, 0.08), transparent 34%),
+        radial-gradient(circle at bottom right, rgba(208, 158, 83, 0.12), transparent 38%),
+        linear-gradient(180deg, var(--bg-soft) 0%, var(--bg-base) 100%);
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+}
+
+button {
+    font-family: inherit;
+    -webkit-tap-highlight-color: transparent;
+}
+
+
+/* =========================================================
+   3. 전체 컨테이너
+   ========================================================= */
+.quiz-container {
+    width: 100%;
+    max-width: 540px;
+    text-align: center;
+}
+
+
+/* =========================================================
+   4. 상단 앱 타이틀
+   ========================================================= */
+.quiz-title {
+    margin: 4px 0 34px;
+
+    font-size: clamp(28px, 7vw, 40px);
+    line-height: 1.15;
+    font-weight: 900;
+    letter-spacing: -1.2px;
+
+    color: var(--text-main);
+
+    white-space: normal;
+    word-break: keep-all;
+}
+
+
+/* =========================================================
+   5. 타이머 / 진행 상태
+   ========================================================= */
+.status-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+
+    margin-bottom: 18px;
+    padding: 0 2px;
+}
+
+.timer-box {
+    min-width: 104px;
+    padding: 8px 14px;
+
+    font-size: 16px;
+    font-weight: 800;
+    line-height: 1;
+
+    color: #FFFDF8;
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+    border-radius: var(--radius-pill);
+
+    box-shadow: 0 8px 18px rgba(159, 47, 47, 0.20);
+
+    font-variant-numeric: tabular-nums;
+}
+
+.progress-text {
+    padding: 8px 13px;
+
+    font-size: 15px;
+    font-weight: 700;
+    line-height: 1;
+
+    color: var(--text-sub);
+    background-color: rgba(255, 253, 247, 0.75);
+    border: 1px solid var(--border-soft);
+    border-radius: var(--radius-pill);
+
+    backdrop-filter: blur(6px);
+}
+
+
+/* =========================================================
+   6. 퀴즈 카드 / 결과 카드 공통
+   ========================================================= */
+.card {
+    position: relative;
+    overflow: hidden;
+
+    width: 100%;
+    padding: 34px 22px 24px;
+
+    background-color: var(--surface);
+    border: 1px solid rgba(84, 62, 35, 0.10);
+    border-radius: var(--radius-lg);
+
+    box-shadow: var(--shadow-card);
+}
+
+.card::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 28px;
+    right: 28px;
+
+    height: 4px;
+    border-radius: 0 0 999px 999px;
+
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(159, 47, 47, 0.42),
+        transparent
+    );
+}
+
+
+/* =========================================================
+   7. 문제 표시 영역
+   ========================================================= */
+.pinyin-display {
+    min-height: 72px;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    margin-bottom: 28px;
+
+    font-size: clamp(34px, 10vw, 56px);
+    line-height: 1.1;
+    font-weight: 900;
+    letter-spacing: -0.5px;
+
+    color: var(--text-main);
+}
+
+
+/* =========================================================
+   8. 선택지 영역
+   ========================================================= */
+.options-container {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 12px;
+}
+
+
+/* =========================================================
+   9. 선택지 버튼
+   ========================================================= */
+.option-btn {
+    width: 100%;
+    min-height: 56px;
+    padding: 14px 16px;
+
+    border: 1px solid rgba(84, 62, 35, 0.13);
+    border-radius: var(--radius-md);
+
+    background: linear-gradient(180deg, #FFFDF8 0%, #FBF4E8 100%);
+    color: var(--text-main);
+
+    font-size: 17px;
+    font-weight: 800;
+    line-height: 1.25;
+    word-break: keep-all;
+
+    cursor: pointer;
+
+    box-shadow: var(--shadow-button);
+
+    transition:
+        transform var(--transition-fast),
+        box-shadow var(--transition-fast),
+        border-color var(--transition-fast),
+        background var(--transition-fast),
+        color var(--transition-fast),
+        filter var(--transition-fast);
+}
+
+@media (hover: hover) {
+    .option-btn:hover {
+        transform: translateY(-2px);
+        border-color: rgba(159, 47, 47, 0.28);
+        background: linear-gradient(180deg, #FFFFFF 0%, #F8EDE0 100%);
+        box-shadow: 0 12px 24px rgba(84, 62, 35, 0.12);
+    }
+}
+
+.option-btn:active {
+    transform: translateY(0) scale(0.985);
+    box-shadow: 0 5px 12px rgba(84, 62, 35, 0.08);
+}
+
+.option-btn:focus-visible {
+    outline: 3px solid rgba(159, 47, 47, 0.28);
+    outline-offset: 3px;
+}
+
+
+/* =========================================================
+   10. 정답 / 오답 표시
+   ========================================================= */
+
+/* 정답 버튼 */
+.option-btn.correct,
+.option-btn.answer-correct,
+.option-btn.right {
+    border-color: rgba(63, 139, 104, 0.58) !important;
+    background: linear-gradient(180deg, var(--success-bg) 0%, var(--success-soft) 100%) !important;
+    color: var(--success-strong) !important;
+
+    box-shadow:
+        0 0 0 3px rgba(63, 139, 104, 0.10),
+        0 8px 18px rgba(63, 139, 104, 0.14) !important;
+
+    animation: correctPulse 620ms ease-in-out 2;
+}
+
+/* 선택한 오답 버튼 */
+.option-btn.wrong,
+.option-btn.answer-wrong,
+.option-btn.incorrect {
+    border-color: rgba(184, 90, 82, 0.64) !important;
+    background: linear-gradient(180deg, var(--danger-bg) 0%, var(--danger-soft) 100%) !important;
+    color: var(--danger-dark) !important;
+
+    box-shadow:
+        0 0 0 3px rgba(184, 90, 82, 0.10),
+        0 8px 18px rgba(184, 90, 82, 0.13) !important;
+
+    animation: wrongShake 360ms ease-in-out;
+}
+
+.option-btn:disabled {
+    cursor: not-allowed;
+    opacity: 0.94;
+}
+
+@keyframes correctPulse {
+    0% {
+        transform: scale(1);
+        filter: brightness(1);
+        box-shadow:
+            0 0 0 3px rgba(63, 139, 104, 0.10),
+            0 8px 18px rgba(63, 139, 104, 0.14);
+    }
+
+    45% {
+        transform: scale(1.025);
+        filter: brightness(1.06);
+        box-shadow:
+            0 0 0 6px rgba(63, 139, 104, 0.15),
+            0 12px 24px rgba(63, 139, 104, 0.18);
+    }
+
+    100% {
+        transform: scale(1);
+        filter: brightness(1);
+        box-shadow:
+            0 0 0 3px rgba(63, 139, 104, 0.10),
+            0 8px 18px rgba(63, 139, 104, 0.14);
+    }
+}
+
+@keyframes wrongShake {
+    0% {
+        transform: translateX(0);
+    }
+
+    20% {
+        transform: translateX(-5px);
+    }
+
+    40% {
+        transform: translateX(5px);
+    }
+
+    60% {
+        transform: translateX(-3px);
+    }
+
+    80% {
+        transform: translateX(3px);
+    }
+
+    100% {
+        transform: translateX(0);
+    }
+}
+
+
+/* =========================================================
+   11. 결과 화면 카드
+   ========================================================= */
+.result-container,
+#result-container,
+.result-box,
+#result-box,
+.result-screen,
+#result-screen {
+    width: 100%;
+    padding: 30px 20px 24px;
+
+    background-color: var(--surface);
+    border: 1px solid rgba(84, 62, 35, 0.10);
+    border-radius: var(--radius-lg);
+
+    box-shadow: var(--shadow-card);
+}
+
+
+/* =========================================================
+   12. 결과 메인 문구 최종 수정
+   ---------------------------------------------------------
+   이 부분이 이번 핵심입니다.
+
+   문제였던 문구:
+   "60초 동안 7문제를 맞혔습니다!"
+
+   수정 내용:
+   1. 문구 전체를 기존보다 작게 표시
+   2. 숫자 7도 주변 글자와 같은 크기로 강제 통일
+   3. #score, .score가 결과 문구 안에 있어도 혼자 커지거나 작아지지 않게 처리
+   ========================================================= */
+
+/*
+   결과 화면의 메인 제목입니다.
+   보통 "타임아웃! 게임 종료" 또는
+   "60초 동안 7문제를 맞혔습니다!"가 h2/h1로 들어갑니다.
+
+   단, 오답노트/정답노트 내부 제목까지 건드리면 안 되므로
+   .wrong-note, .correct-note 내부 제목은 아래에서 따로 다시 잡습니다.
+*/
+.result-container > h1,
+.result-container > h2,
+.result-container > h3,
+#result-container > h1,
+#result-container > h2,
+#result-container > h3,
+.result-box > h1,
+.result-box > h2,
+.result-box > h3,
+#result-box > h1,
+#result-box > h2,
+#result-box > h3,
+.result-screen > h1,
+.result-screen > h2,
+.result-screen > h3,
+#result-screen > h1,
+#result-screen > h2,
+#result-screen > h3,
+.card > h1:not(.quiz-title),
+.card > h2:not(.quiz-title),
+.card > h3:not(.quiz-title) {
+    margin: 8px 0 12px !important;
+
+    /*
+       이미지에서 너무 크게 보였으므로 모바일 기준 27px 전후로 낮췄습니다.
+       PC에서도 32px 이상 커지지 않게 제한합니다.
+    */
+    font-size: clamp(24px, 5.8vw, 32px) !important;
+    line-height: 1.22 !important;
+    font-weight: 900 !important;
+    letter-spacing: -0.8px !important;
+
+    color: var(--primary) !important;
+
+    word-break: keep-all !important;
+    overflow-wrap: break-word !important;
+}
+
+/*
+   핵심 보정:
+   결과 제목 안에 들어간 span, b, strong, em, small, sup, i 등을
+   전부 부모 제목과 같은 크기로 맞춥니다.
+
+   이것 때문에 숫자 7만 작게 보이는 문제가 해결됩니다.
+*/
+.result-container > h1 *,
+.result-container > h2 *,
+.result-container > h3 *,
+#result-container > h1 *,
+#result-container > h2 *,
+#result-container > h3 *,
+.result-box > h1 *,
+.result-box > h2 *,
+.result-box > h3 *,
+#result-box > h1 *,
+#result-box > h2 *,
+#result-box > h3 *,
+.result-screen > h1 *,
+.result-screen > h2 *,
+.result-screen > h3 *,
+#result-screen > h1 *,
+#result-screen > h2 *,
+#result-screen > h3 *,
+.card > h1:not(.quiz-title) *,
+.card > h2:not(.quiz-title) *,
+.card > h3:not(.quiz-title) * {
+    font-size: inherit !important;
+    line-height: inherit !important;
+    font-weight: inherit !important;
+    letter-spacing: inherit !important;
+    color: inherit !important;
+
+    vertical-align: baseline !important;
+    position: static !important;
+    top: auto !important;
+    bottom: auto !important;
+    transform: none !important;
+
+    display: inline !important;
+}
+
+/*
+   결과 제목 안의 #score, .score 전용 방어 코드입니다.
+
+   기존 CSS에는 .score, #score를 크게 만드는 전역 스타일이 있었는데,
+   그 스타일이 결과 문장 안의 숫자 7에도 적용되면서 문제가 생겼습니다.
+
+   따라서 결과 제목 안에서는 숫자가 무조건 문장 글자와 같은 크기를 따라가게 합니다.
+*/
+.result-container > h1 #score,
+.result-container > h2 #score,
+.result-container > h3 #score,
+.result-container > h1 .score,
+.result-container > h2 .score,
+.result-container > h3 .score,
+.result-container > h1 .final-score,
+.result-container > h2 .final-score,
+.result-container > h3 .final-score,
+.result-container > h1 #final-score,
+.result-container > h2 #final-score,
+.result-container > h3 #final-score,
+#result-container > h1 #score,
+#result-container > h2 #score,
+#result-container > h3 #score,
+#result-container > h1 .score,
+#result-container > h2 .score,
+#result-container > h3 .score,
+#result-container > h1 .final-score,
+#result-container > h2 .final-score,
+#result-container > h3 .final-score,
+#result-container > h1 #final-score,
+#result-container > h2 #final-score,
+#result-container > h3 #final-score,
+.card > h1 #score,
+.card > h2 #score,
+.card > h3 #score,
+.card > h1 .score,
+.card > h2 .score,
+.card > h3 .score,
+.card > h1 .final-score,
+.card > h2 .final-score,
+.card > h3 .final-score,
+.card > h1 #final-score,
+.card > h2 #final-score,
+.card > h3 #final-score {
+    margin: 0 !important;
+    padding: 0 !important;
+
+    font-size: inherit !important;
+    line-height: inherit !important;
+    font-weight: inherit !important;
+    letter-spacing: inherit !important;
+    color: inherit !important;
+
+    vertical-align: baseline !important;
+    display: inline !important;
+    position: static !important;
+    transform: none !important;
+}
+
+/*
+   결과 설명 문구입니다.
+   예:
+   "종료 직전까지 총 8문제를 풀었습니다."
+
+   메인 결과 문구보다 작고 차분하게 보이게 유지합니다.
+*/
+.result-container p,
+#result-container p,
+.result-box p,
+#result-box p,
+.result-screen p,
+#result-screen p,
+#result-text,
+.result-text,
+#score-text,
+.score-text,
+#final-message,
+.final-message,
+#result-message,
+.result-message {
+    margin: 8px 0 18px !important;
+
+    font-size: clamp(14px, 3.7vw, 16px) !important;
+    font-weight: 600 !important;
+    line-height: 1.55 !important;
+
+    color: var(--text-sub) !important;
+    word-break: keep-all !important;
+}
+
+
+/*
+   독립 점수 박스용 스타일입니다.
+
+   중요:
+   여기서는 .score, #score를 전역으로 크게 만들지 않습니다.
+   이전 파일의 문제 원인이 바로 그 전역 스타일이었습니다.
+
+   점수가 문장 밖에서 단독으로 쓰일 때만 크게 보이게 합니다.
+*/
+.score:not(h1 .score):not(h2 .score):not(h3 .score),
+#score:not(h1 #score):not(h2 #score):not(h3 #score),
+.final-score:not(h1 .final-score):not(h2 .final-score):not(h3 .final-score),
+#final-score:not(h1 #final-score):not(h2 #final-score):not(h3 #final-score) {
+    margin: 16px auto 18px;
+
+    font-size: clamp(30px, 8vw, 46px);
+    line-height: 1;
+    font-weight: 900;
+    letter-spacing: -1px;
+
+    color: var(--primary);
+}
+
+
+/* =========================================================
+   13. 기본 액션 버튼
+   ========================================================= */
+.restart-btn,
+#restart-btn,
+.start-btn,
+#start-btn,
+.retry-btn,
+#retry-btn,
+.replay-btn,
+#replay-btn,
+.reset-btn,
+#reset-btn {
+    width: min(100%, 360px);
+    min-height: 58px;
+    margin-top: 16px;
+    padding: 16px 24px;
+
+    border: none;
+    border-radius: var(--radius-pill);
+
+    color: #FFFDF8;
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+
+    font-size: 18px;
+    font-weight: 900;
+    line-height: 1.2;
+
+    cursor: pointer;
+
+    box-shadow: 0 12px 26px rgba(159, 47, 47, 0.24);
+
+    transition:
+        transform var(--transition-fast),
+        box-shadow var(--transition-fast),
+        filter var(--transition-fast);
+}
+
+/* 카카오 / 공유 버튼 */
+.kakao-btn,
+#kakao-share-btn,
+.share-btn,
+#share-btn {
+    min-height: 54px;
+    padding: 14px 22px;
+
+    border: none;
+    border-radius: var(--radius-pill);
+
+    color: var(--kakao-text);
+    background: linear-gradient(135deg, #FFE777, var(--kakao));
+
+    font-size: 16px;
+    font-weight: 900;
+    line-height: 1.2;
+
+    cursor: pointer;
+
+    box-shadow: 0 10px 22px rgba(138, 112, 0, 0.16);
+
+    transition:
+        transform var(--transition-fast),
+        box-shadow var(--transition-fast),
+        filter var(--transition-fast);
+}
+
+@media (hover: hover) {
+    .restart-btn:hover,
+    #restart-btn:hover,
+    .start-btn:hover,
+    #start-btn:hover,
+    .retry-btn:hover,
+    #retry-btn:hover,
+    .replay-btn:hover,
+    #replay-btn:hover,
+    .reset-btn:hover,
+    #reset-btn:hover,
+    .kakao-btn:hover,
+    #kakao-share-btn:hover,
+    .share-btn:hover,
+    #share-btn:hover {
+        transform: translateY(-2px);
+        filter: brightness(1.03);
+    }
+}
+
+.restart-btn:active,
+#restart-btn:active,
+.start-btn:active,
+#start-btn:active,
+.retry-btn:active,
+#retry-btn:active,
+.replay-btn:active,
+#replay-btn:active,
+.reset-btn:active,
+#reset-btn:active,
+.kakao-btn:active,
+#kakao-share-btn:active,
+.share-btn:active,
+#share-btn:active {
+    transform: scale(0.985);
+}
+
+
+/* =========================================================
+   14. 오답노트 / 정답노트 버튼 강조
+   ========================================================= */
+.note-buttons,
+.note-button-container,
+.result-note-buttons,
+#note-buttons,
+#note-button-container,
+#result-note-buttons {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 12px;
+
+    width: 100%;
+    margin-top: 18px;
+}
+
+/* 오답노트 버튼 */
+.wrong-note-btn,
+#wrong-note-btn,
+.incorrect-note-btn,
+#incorrect-note-btn,
+.wrong-list-btn,
+#wrong-list-btn,
+.mistake-note-btn,
+#mistake-note-btn,
+.mistake-list-btn,
+#mistake-list-btn,
+button[onclick*="wrong"],
+button[onclick*="Wrong"],
+button[onclick*="incorrect"],
+button[onclick*="Incorrect"],
+button[onclick*="mistake"],
+button[onclick*="Mistake"] {
+    width: min(100%, 380px) !important;
+    min-height: 64px !important;
+    margin: 10px auto 0 !important;
+    padding: 17px 24px !important;
+
+    border: 2px solid rgba(139, 48, 44, 0.82) !important;
+    border-radius: 18px !important;
+
+    color: #FFFDF8 !important;
+    background: linear-gradient(135deg, #C8554D 0%, #8B302C 100%) !important;
+
+    font-size: 18px !important;
+    font-weight: 900 !important;
+    line-height: 1.2 !important;
+    letter-spacing: -0.3px !important;
+
+    box-shadow:
+        0 14px 28px rgba(139, 48, 44, 0.28),
+        0 3px 8px rgba(84, 32, 32, 0.16) !important;
+
+    cursor: pointer;
+
+    transition:
+        transform var(--transition-fast),
+        box-shadow var(--transition-fast),
+        filter var(--transition-fast) !important;
+}
+
+/* 정답노트 버튼 */
+.correct-note-btn,
+#correct-note-btn,
+.answer-note-btn,
+#answer-note-btn,
+.correct-list-btn,
+#correct-list-btn,
+.answer-list-btn,
+#answer-list-btn,
+button[onclick*="correct"],
+button[onclick*="Correct"],
+button[onclick*="answer"],
+button[onclick*="Answer"] {
+    width: min(100%, 380px) !important;
+    min-height: 64px !important;
+    margin: 10px auto 0 !important;
+    padding: 17px 24px !important;
+
+    border: 2px solid rgba(37, 104, 77, 0.78) !important;
+    border-radius: 18px !important;
+
+    color: #FFFDF8 !important;
+    background: linear-gradient(135deg, #4F9B76 0%, #25684D 100%) !important;
+
+    font-size: 18px !important;
+    font-weight: 900 !important;
+    line-height: 1.2 !important;
+    letter-spacing: -0.3px !important;
+
+    box-shadow:
+        0 14px 28px rgba(37, 104, 77, 0.24),
+        0 3px 8px rgba(20, 70, 48, 0.14) !important;
+
+    cursor: pointer;
+
+    transition:
+        transform var(--transition-fast),
+        box-shadow var(--transition-fast),
+        filter var(--transition-fast) !important;
+}
+
+@media (hover: hover) {
+    .wrong-note-btn:hover,
+    #wrong-note-btn:hover,
+    .incorrect-note-btn:hover,
+    #incorrect-note-btn:hover,
+    .wrong-list-btn:hover,
+    #wrong-list-btn:hover,
+    .mistake-note-btn:hover,
+    #mistake-note-btn:hover,
+    .mistake-list-btn:hover,
+    #mistake-list-btn:hover,
+    .correct-note-btn:hover,
+    #correct-note-btn:hover,
+    .answer-note-btn:hover,
+    #answer-note-btn:hover,
+    .correct-list-btn:hover,
+    #correct-list-btn:hover,
+    .answer-list-btn:hover,
+    #answer-list-btn:hover,
+    button[onclick*="wrong"]:hover,
+    button[onclick*="Wrong"]:hover,
+    button[onclick*="incorrect"]:hover,
+    button[onclick*="Incorrect"]:hover,
+    button[onclick*="mistake"]:hover,
+    button[onclick*="Mistake"]:hover,
+    button[onclick*="correct"]:hover,
+    button[onclick*="Correct"]:hover,
+    button[onclick*="answer"]:hover,
+    button[onclick*="Answer"]:hover {
+        transform: translateY(-2px);
+        filter: brightness(1.04);
+    }
+}
+
+.wrong-note-btn:active,
+#wrong-note-btn:active,
+.incorrect-note-btn:active,
+#incorrect-note-btn:active,
+.wrong-list-btn:active,
+#wrong-list-btn:active,
+.mistake-note-btn:active,
+#mistake-note-btn:active,
+.mistake-list-btn:active,
+#mistake-list-btn:active,
+.correct-note-btn:active,
+#correct-note-btn:active,
+.answer-note-btn:active,
+#answer-note-btn:active,
+.correct-list-btn:active,
+#correct-list-btn:active,
+.answer-list-btn:active,
+#answer-list-btn:active {
+    transform: scale(0.985);
+}
+
+
+/* =========================================================
+   15. 오답노트 / 정답노트 영역
+   ========================================================= */
+
+/* 오답노트 영역 */
+.wrong-note,
+#wrong-note,
+.incorrect-note,
+#incorrect-note,
+.wrong-list,
+#wrong-list,
+.mistake-note,
+#mistake-note,
+.mistake-list,
+#mistake-list {
+    margin-top: 18px;
+    padding: 18px 16px;
+
+    border: 2px solid rgba(139, 48, 44, 0.34);
+    border-radius: 20px;
+
+    background: linear-gradient(180deg, #FFF6F4 0%, #F6DDD9 100%);
+
+    box-shadow:
+        0 12px 28px rgba(139, 48, 44, 0.13),
+        0 3px 8px rgba(84, 32, 32, 0.08);
+}
+
+/* 정답노트 영역 */
+.correct-note,
+#correct-note,
+.answer-note,
+#answer-note,
+.correct-list,
+#correct-list,
+.answer-list,
+#answer-list {
+    margin-top: 18px;
+    padding: 18px 16px;
+
+    border: 2px solid rgba(63, 139, 104, 0.34);
+    border-radius: 20px;
+
+    background: linear-gradient(180deg, #F3FAF6 0%, #DCEFE4 100%);
+
+    box-shadow:
+        0 12px 28px rgba(63, 139, 104, 0.13),
+        0 3px 8px rgba(20, 70, 48, 0.08);
+}
+
+/*
+   오답노트 제목
+   결과 메인 제목 보정과 충돌하지 않도록 여기서 다시 명확히 지정합니다.
+*/
+.wrong-note h2,
+#wrong-note h2,
+.wrong-note h3,
+#wrong-note h3,
+.incorrect-note h2,
+#incorrect-note h2,
+.incorrect-note h3,
+#incorrect-note h3,
+.wrong-list h2,
+#wrong-list h2,
+.wrong-list h3,
+#wrong-list h3,
+.mistake-note h2,
+#mistake-note h2,
+.mistake-note h3,
+#mistake-note h3,
+.mistake-list h2,
+#mistake-list h2,
+.mistake-list h3,
+#mistake-list h3 {
+    margin: 0 0 12px !important;
+
+    color: var(--danger-dark) !important;
+
+    font-size: 22px !important;
+    font-weight: 900 !important;
+    line-height: 1.25 !important;
+}
+
+/* 정답노트 제목 */
+.correct-note h2,
+#correct-note h2,
+.correct-note h3,
+#correct-note h3,
+.answer-note h2,
+#answer-note h2,
+.answer-note h3,
+#answer-note h3,
+.correct-list h2,
+#correct-list h2,
+.correct-list h3,
+#correct-list h3,
+.answer-list h2,
+#answer-list h2,
+.answer-list h3,
+#answer-list h3 {
+    margin: 0 0 12px !important;
+
+    color: var(--success-strong) !important;
+
+    font-size: 22px !important;
+    font-weight: 900 !important;
+    line-height: 1.25 !important;
+}
+
+/* 노트 안 리스트 공통 */
+.wrong-note ul,
+#wrong-note ul,
+.incorrect-note ul,
+#incorrect-note ul,
+.wrong-list ul,
+#wrong-list ul,
+.mistake-note ul,
+#mistake-note ul,
+.mistake-list ul,
+#mistake-list ul,
+.correct-note ul,
+#correct-note ul,
+.answer-note ul,
+#answer-note ul,
+.correct-list ul,
+#correct-list ul,
+.answer-list ul,
+#answer-list ul {
+    margin: 0;
+    padding: 0;
+}
+
+/* 노트 안 항목 */
+.wrong-note li,
+#wrong-note li,
+.incorrect-note li,
+#incorrect-note li,
+.wrong-list li,
+#wrong-list li,
+.mistake-note li,
+#mistake-note li,
+.mistake-list li,
+#mistake-list li,
+.correct-note li,
+#correct-note li,
+.answer-note li,
+#answer-note li,
+.correct-list li,
+#correct-list li,
+.answer-list li,
+#answer-list li {
+    margin: 8px 0;
+    padding: 12px 14px;
+
+    list-style: none;
+
+    background-color: rgba(255, 255, 255, 0.76);
+    border-radius: 14px;
+
+    color: #2B2118;
+
+    font-size: 15px;
+    font-weight: 800;
+    line-height: 1.45;
+
+    box-shadow: 0 3px 8px rgba(84, 62, 35, 0.08);
+}
+
+
+/* =========================================================
+   16. 숨김 처리
+   ========================================================= */
+.hidden {
+    display: none !important;
+}
+
+
+/* =========================================================
+   17. 태블릿 / PC 레이아웃
+   ========================================================= */
+@media (min-width: 520px) {
+    body {
+        padding: 28px;
+    }
+
+    .card {
+        padding: 42px 34px 32px;
+    }
+
+    .options-container {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 14px;
+    }
+
+    .option-btn {
+        min-height: 62px;
+        font-size: 18px;
+    }
+
+    .restart-btn,
+    #restart-btn,
+    .start-btn,
+    #start-btn,
+    .retry-btn,
+    #retry-btn,
+    .replay-btn,
+    #replay-btn,
+    .reset-btn,
+    #reset-btn {
+        width: min(100%, 320px);
+    }
+
+    .note-buttons,
+    .note-button-container,
+    .result-note-buttons,
+    #note-buttons,
+    #note-button-container,
+    #result-note-buttons {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+
+/* =========================================================
+   18. 모바일 화면 보정
+   ========================================================= */
+@media (max-width: 520px) {
+    /*
+       모바일에서 결과 메인 문구를 확실히 줄입니다.
+       이미지에서 문제가 됐던 "60초 동안 7문제를 맞혔습니다!" 문구가
+       더 이상 과하게 커지지 않도록 제한합니다.
+    */
+    .result-container > h1,
+    .result-container > h2,
+    .result-container > h3,
+    #result-container > h1,
+    #result-container > h2,
+    #result-container > h3,
+    .result-box > h1,
+    .result-box > h2,
+    .result-box > h3,
+    #result-box > h1,
+    #result-box > h2,
+    #result-box > h3,
+    .result-screen > h1,
+    .result-screen > h2,
+    .result-screen > h3,
+    #result-screen > h1,
+    #result-screen > h2,
+    #result-screen > h3,
+    .card > h1:not(.quiz-title),
+    .card > h2:not(.quiz-title),
+    .card > h3:not(.quiz-title) {
+        font-size: clamp(23px, 6.1vw, 28px) !important;
+        line-height: 1.24 !important;
+        letter-spacing: -0.7px !important;
+        margin: 8px 0 12px !important;
+    }
+
+    /*
+       모바일에서도 숫자 7은 무조건 같은 크기입니다.
+    */
+    .result-container > h1 *,
+    .result-container > h2 *,
+    .result-container > h3 *,
+    #result-container > h1 *,
+    #result-container > h2 *,
+    #result-container > h3 *,
+    .result-box > h1 *,
+    .result-box > h2 *,
+    .result-box > h3 *,
+    #result-box > h1 *,
+    #result-box > h2 *,
+    #result-box > h3 *,
+    .result-screen > h1 *,
+    .result-screen > h2 *,
+    .result-screen > h3 *,
+    #result-screen > h1 *,
+    #result-screen > h2 *,
+    #result-screen > h3 *,
+    .card > h1:not(.quiz-title) *,
+    .card > h2:not(.quiz-title) *,
+    .card > h3:not(.quiz-title) * {
+        font-size: inherit !important;
+        line-height: inherit !important;
+        vertical-align: baseline !important;
+        transform: none !important;
+    }
+}
+
+
+/* =========================================================
+   19. 작은 모바일 화면 보정
+   ========================================================= */
+@media (max-width: 360px) {
+    body {
+        padding: 14px;
+    }
+
+    .quiz-title {
+        margin-bottom: 14px;
+        font-size: 26px;
+    }
+
+    .status-container {
+        gap: 8px;
+    }
+
+    .timer-box,
+    .progress-text {
+        padding: 7px 10px;
+        font-size: 14px;
+    }
+
+    .card {
+        padding: 30px 18px 22px;
+        border-radius: 24px;
+    }
+
+    .pinyin-display {
+        min-height: 62px;
+        margin-bottom: 22px;
+    }
+
+    .option-btn {
+        min-height: 52px;
+        padding: 12px 14px;
+        font-size: 16px;
+    }
+
+    .result-container > h1,
+    .result-container > h2,
+    .result-container > h3,
+    #result-container > h1,
+    #result-container > h2,
+    #result-container > h3,
+    .result-box > h1,
+    .result-box > h2,
+    .result-box > h3,
+    #result-box > h1,
+    #result-box > h2,
+    #result-box > h3,
+    .result-screen > h1,
+    .result-screen > h2,
+    .result-screen > h3,
+    #result-screen > h1,
+    #result-screen > h2,
+    #result-screen > h3,
+    .card > h1:not(.quiz-title),
+    .card > h2:not(.quiz-title),
+    .card > h3:not(.quiz-title) {
+        font-size: 23px !important;
+        line-height: 1.25 !important;
+    }
+
+    .result-container p,
+    #result-container p,
+    .result-box p,
+    #result-box p,
+    .result-screen p,
+    #result-screen p,
+    #result-text,
+    .result-text,
+    #score-text,
+    .score-text,
+    #final-message,
+    .final-message,
+    #result-message,
+    .result-message {
+        font-size: 14px !important;
+        line-height: 1.5 !important;
+    }
+
+    .restart-btn,
+    #restart-btn,
+    .start-btn,
+    #start-btn,
+    .retry-btn,
+    #retry-btn,
+    .replay-btn,
+    #replay-btn,
+    .reset-btn,
+    #reset-btn {
+        min-height: 56px;
+        padding: 15px 20px;
+        font-size: 17px;
+    }
+}
+
+
+/* =========================================================
+   20. 모바일에서 오답노트 / 정답노트 보정
+   ========================================================= */
+@media (max-width: 420px) {
+    .wrong-note-btn,
+    #wrong-note-btn,
+    .incorrect-note-btn,
+    #incorrect-note-btn,
+    .wrong-list-btn,
+    #wrong-list-btn,
+    .mistake-note-btn,
+    #mistake-note-btn,
+    .mistake-list-btn,
+    #mistake-list-btn,
+    .correct-note-btn,
+    #correct-note-btn,
+    .answer-note-btn,
+    #answer-note-btn,
+    .correct-list-btn,
+    #correct-list-btn,
+    .answer-list-btn,
+    #answer-list-btn {
+        width: 100% !important;
+        min-height: 64px !important;
+        font-size: 18px !important;
+        border-radius: 18px !important;
+    }
+
+    .wrong-note,
+    #wrong-note,
+    .incorrect-note,
+    #incorrect-note,
+    .wrong-list,
+    #wrong-list,
+    .mistake-note,
+    #mistake-note,
+    .mistake-list,
+    #mistake-list,
+    .correct-note,
+    #correct-note,
+    .answer-note,
+    #answer-note,
+    .correct-list,
+    #correct-list,
+    .answer-list,
+    #answer-list {
+        padding: 16px 14px;
+        border-radius: 18px;
+    }
+}
+
+
+/* =========================================================
+   21. 최후 방어 코드
+   ---------------------------------------------------------
+   만약 JS가 결과 문구 숫자에 small, sup, span, i 같은 태그를 섞어도
+   제목 안에서는 절대 혼자 작아지지 않게 마지막에 한 번 더 고정합니다.
+   ========================================================= */
+.card > h1:not(.quiz-title) span,
+.card > h1:not(.quiz-title) strong,
+.card > h1:not(.quiz-title) b,
+.card > h1:not(.quiz-title) em,
+.card > h1:not(.quiz-title) small,
+.card > h1:not(.quiz-title) sup,
+.card > h1:not(.quiz-title) i,
+.card > h2:not(.quiz-title) span,
+.card > h2:not(.quiz-title) strong,
+.card > h2:not(.quiz-title) b,
+.card > h2:not(.quiz-title) em,
+.card > h2:not(.quiz-title) small,
+.card > h2:not(.quiz-title) sup,
+.card > h2:not(.quiz-title) i,
+.card > h3:not(.quiz-title) span,
+.card > h3:not(.quiz-title) strong,
+.card > h3:not(.quiz-title) b,
+.card > h3:not(.quiz-title) em,
+.card > h3:not(.quiz-title) small,
+.card > h3:not(.quiz-title) sup,
+.card > h3:not(.quiz-title) i {
+    font-size: inherit !important;
+    line-height: inherit !important;
+    font-weight: inherit !important;
+    color: inherit !important;
+    vertical-align: baseline !important;
+    position: static !important;
+    top: auto !important;
+    transform: none !important;
+}
+
+
+/* =========================================================
+   22. 애니메이션 최소화 접근성
+   ========================================================= */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        transition-duration: 0.01ms !important;
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        scroll-behavior: auto !important;
+    }
+}
+/* =========================================================
+   FINAL RESULT TEXT FIX
+   ---------------------------------------------------------
+   실제 원인:
+   결과 화면의 "60초 동안 8문제를 맞혔습니다!" 문구 또는 숫자에
+   .score / #score / .final-score 같은 클래스가 붙어 있음.
+
+   기존 CSS에서 .score를 큰 점수 숫자용으로 잡아버려서
+   결과 문장이 비정상적으로 커지고,
+   숫자만 따로 작거나 어긋나 보이는 문제가 발생함.
+
+   해결:
+   1. 결과 카드 안의 .score 문구를 일반 결과 문장 크기로 강제 조정
+   2. 그 안의 숫자 span, strong, b, em, i 등을 모두 같은 크기로 통일
+   3. "맞혔습니다"가 이상하게 끊기지 않도록 폭과 줄바꿈 방식 보정
+   ========================================================= */
+
+
+/* ---------------------------------------------------------
+   1. 결과 화면 상단 제목
+   예: "⏱️ 타임아웃! 게임 종료 ⏱️"
+   --------------------------------------------------------- */
+#result-card h1,
+#result-card h2,
+#result-card h3,
+.result-card h1,
+.result-card h2,
+.result-card h3,
+.result-container h1,
+.result-container h2,
+.result-container h3,
+#result-container h1,
+#result-container h2,
+#result-container h3,
+.card.result h1,
+.card.result h2,
+.card.result h3 {
+    font-size: clamp(24px, 5vw, 32px) !important;
+    line-height: 1.25 !important;
+    font-weight: 900 !important;
+    letter-spacing: -0.7px !important;
+    color: #9F2F2F !important;
+    margin: 10px 0 12px !important;
+    word-break: keep-all !important;
+}
+
+
+/* ---------------------------------------------------------
+   2. 핵심 수정:
+   결과 점수 문장 자체를 작게 조정
+
+   예:
+   "60초 동안 8문제를 맞혔습니다!"
+   --------------------------------------------------------- */
+#result-card .score,
+#result-card #score-text,
+#result-card .score-text,
+#result-card .final-score,
+#result-card #final-score,
+#result-card .result-score,
+#result-card #result-score,
+#result-card .result-summary,
+#result-card #result-summary,
+#result-card .result-main,
+#result-card #result-main,
+#result-card .result-main-text,
+#result-card #result-main-text,
+.result-card .score,
+.result-card #score-text,
+.result-card .score-text,
+.result-card .final-score,
+.result-card #final-score,
+.result-card .result-score,
+.result-card #result-score,
+.result-card .result-summary,
+.result-card #result-summary,
+.result-card .result-main,
+.result-card #result-main,
+.result-card .result-main-text,
+.result-card #result-main-text,
+.result-container .score,
+.result-container #score-text,
+.result-container .score-text,
+.result-container .final-score,
+.result-container #final-score,
+.result-container .result-score,
+.result-container #result-score,
+.result-container .result-summary,
+.result-container #result-summary,
+.result-container .result-main,
+.result-container #result-main,
+.result-container .result-main-text,
+.result-container #result-main-text,
+#result-container .score,
+#result-container #score-text,
+#result-container .score-text,
+#result-container .final-score,
+#result-container #final-score,
+#result-container .result-score,
+#result-container #result-score,
+#result-container .result-summary,
+#result-container #result-summary,
+#result-container .result-main,
+#result-container #result-main,
+#result-container .result-main-text,
+#result-container #result-main-text {
+    /*
+       기존처럼 40~60px로 커지지 않게 강제 제한합니다.
+       모바일에서는 약 22~25px,
+       PC에서도 최대 28px까지만 커집니다.
+    */
+    font-size: clamp(21px, 4.8vw, 28px) !important;
+    line-height: 1.32 !important;
+    font-weight: 900 !important;
+    letter-spacing: -0.6px !important;
+
+    color: #9F2F2F !important;
+
+    margin: 12px auto 10px !important;
+    padding: 0 !important;
+
+    /*
+       문장이 너무 넓게 퍼지거나 이상하게 끊기는 것을 방지합니다.
+    */
+    max-width: 100% !important;
+    width: 100% !important;
+
+    text-align: center !important;
+    word-break: keep-all !important;
+    overflow-wrap: normal !important;
+    white-space: normal !important;
+
+    display: block !important;
+}
+
+
+/* ---------------------------------------------------------
+   3. 숫자만 작아지는 문제 최종 해결
+
+   예:
+   <span id="score">8</span>
+   <span class="score">8</span>
+   <strong>8</strong>
+   <b>8</b>
+
+   위처럼 숫자가 어떤 태그로 감싸져 있어도
+   부모 문장과 같은 크기로 맞춥니다.
+   --------------------------------------------------------- */
+#result-card .score *,
+#result-card #score-text *,
+#result-card .score-text *,
+#result-card .final-score *,
+#result-card #final-score *,
+#result-card .result-score *,
+#result-card #result-score *,
+#result-card .result-summary *,
+#result-card #result-summary *,
+#result-card .result-main *,
+#result-card #result-main *,
+#result-card .result-main-text *,
+#result-card #result-main-text *,
+.result-card .score *,
+.result-card #score-text *,
+.result-card .score-text *,
+.result-card .final-score *,
+.result-card #final-score *,
+.result-card .result-score *,
+.result-card #result-score *,
+.result-card .result-summary *,
+.result-card #result-summary *,
+.result-card .result-main *,
+.result-card #result-main *,
+.result-card .result-main-text *,
+.result-card #result-main-text *,
+.result-container .score *,
+.result-container #score-text *,
+.result-container .score-text *,
+.result-container .final-score *,
+.result-container #final-score *,
+.result-container .result-score *,
+.result-container #result-score *,
+.result-container .result-summary *,
+.result-container #result-summary *,
+.result-container .result-main *,
+.result-container #result-main *,
+.result-container .result-main-text *,
+.result-container #result-main-text *,
+#result-container .score *,
+#result-container #score-text *,
+#result-container .score-text *,
+#result-container .final-score *,
+#result-container #final-score *,
+#result-container .result-score *,
+#result-container #result-score *,
+#result-container .result-summary *,
+#result-container #result-summary *,
+#result-container .result-main *,
+#result-container #result-main *,
+#result-container .result-main-text *,
+#result-container #result-main-text * {
+    font-size: inherit !important;
+    line-height: inherit !important;
+    font-weight: inherit !important;
+    letter-spacing: inherit !important;
+    color: inherit !important;
+
+    vertical-align: baseline !important;
+    position: static !important;
+    top: auto !important;
+    bottom: auto !important;
+    transform: none !important;
+
+    display: inline !important;
+}
+
+
+/* ---------------------------------------------------------
+   4. 숫자가 id="score"로 따로 박힌 경우 직접 제압
+
+   현재 이미지에서 숫자 8만 작게 보이는 것으로 봐서
+   이 케이스일 가능성이 높습니다.
+   --------------------------------------------------------- */
+#result-card #score,
+#result-card .score-number,
+#result-card .correct-count,
+#result-card .answer-count,
+#result-card .count,
+.result-card #score,
+.result-card .score-number,
+.result-card .correct-count,
+.result-card .answer-count,
+.result-card .count,
+.result-container #score,
+.result-container .score-number,
+.result-container .correct-count,
+.result-container .answer-count,
+.result-container .count,
+#result-container #score,
+#result-container .score-number,
+#result-container .correct-count,
+#result-container .answer-count,
+#result-container .count {
+    font-size: inherit !important;
+    line-height: inherit !important;
+    font-weight: inherit !important;
+    letter-spacing: inherit !important;
+    color: inherit !important;
+
+    margin: 0 !important;
+    padding: 0 !important;
+
+    vertical-align: baseline !important;
+    display: inline !important;
+    position: static !important;
+    top: auto !important;
+    transform: none !important;
+}
+
+
+/* ---------------------------------------------------------
+   5. 결과 설명 문구
+   예: "종료 직전까지 총 9문제를 풀었습니다."
+   --------------------------------------------------------- */
+#result-card p,
+.result-card p,
+.result-container p,
+#result-container p {
+    font-size: clamp(14px, 3.4vw, 16px) !important;
+    line-height: 1.55 !important;
+    font-weight: 600 !important;
+    color: #5F5143 !important;
+    margin: 8px 0 18px !important;
+    word-break: keep-all !important;
+}
+
+
+/* ---------------------------------------------------------
+   6. 모바일에서 결과 점수 문구 추가 축소
+   --------------------------------------------------------- */
+@media (max-width: 520px) {
+    #result-card .score,
+    #result-card #score-text,
+    #result-card .score-text,
+    #result-card .final-score,
+    #result-card #final-score,
+    #result-card .result-score,
+    #result-card #result-score,
+    #result-card .result-summary,
+    #result-card #result-summary,
+    #result-card .result-main,
+    #result-card #result-main,
+    #result-card .result-main-text,
+    #result-card #result-main-text,
+    .result-card .score,
+    .result-card #score-text,
+    .result-card .score-text,
+    .result-card .final-score,
+    .result-card #final-score,
+    .result-card .result-score,
+    .result-card #result-score,
+    .result-card .result-summary,
+    .result-card #result-summary,
+    .result-card .result-main,
+    .result-card #result-main,
+    .result-card .result-main-text,
+    .result-card #result-main-text,
+    .result-container .score,
+    .result-container #score-text,
+    .result-container .score-text,
+    .result-container .final-score,
+    .result-container #final-score,
+    .result-container .result-score,
+    .result-container #result-score,
+    .result-container .result-summary,
+    .result-container #result-summary,
+    .result-container .result-main,
+    .result-container #result-main,
+    .result-container .result-main-text,
+    .result-container #result-main-text,
+    #result-container .score,
+    #result-container #score-text,
+    #result-container .score-text,
+    #result-container .final-score,
+    #result-container #final-score,
+    #result-container .result-score,
+    #result-container #result-score,
+    #result-container .result-summary,
+    #result-container #result-summary,
+    #result-container .result-main,
+    #result-container #result-main,
+    #result-container .result-main-text,
+    #result-container #result-main-text {
+        /*
+           이미지 기준 현재 너무 크므로 모바일에서는 확실히 22px대로 제한합니다.
+        */
+        font-size: clamp(20px, 5.1vw, 23px) !important;
+        line-height: 1.35 !important;
+        letter-spacing: -0.5px !important;
+        margin: 10px auto 8px !important;
+    }
+
+    #result-card h1,
+    #result-card h2,
+    #result-card h3,
+    .result-card h1,
+    .result-card h2,
+    .result-card h3,
+    .result-container h1,
+    .result-container h2,
+    .result-container h3,
+    #result-container h1,
+    #result-container h2,
+    #result-container h3 {
+        font-size: clamp(22px, 5.6vw, 27px) !important;
+        line-height: 1.25 !important;
+    }
+}
+
+
+/* ---------------------------------------------------------
+   7. 아주 작은 화면 보정
+   --------------------------------------------------------- */
+@media (max-width: 380px) {
+    #result-card .score,
+    #result-card #score-text,
+    #result-card .score-text,
+    #result-card .final-score,
+    #result-card #final-score,
+    #result-card .result-score,
+    #result-card #result-score,
+    #result-card .result-summary,
+    #result-card #result-summary,
+    #result-card .result-main,
+    #result-card #result-main,
+    #result-card .result-main-text,
+    #result-card #result-main-text,
+    .result-card .score,
+    .result-card #score-text,
+    .result-card .score-text,
+    .result-card .final-score,
+    .result-card #final-score,
+    .result-card .result-score,
+    .result-card #result-score,
+    .result-card .result-summary,
+    .result-card #result-summary,
+    .result-card .result-main,
+    .result-card #result-main,
+    .result-card .result-main-text,
+    .result-card #result-main-text,
+    .result-container .score,
+    .result-container #score-text,
+    .result-container .score-text,
+    .result-container .final-score,
+    .result-container #final-score,
+    .result-container .result-score,
+    .result-container #result-score,
+    .result-container .result-summary,
+    .result-container #result-summary,
+    .result-container .result-main,
+    .result-container #result-main,
+    .result-container .result-main-text,
+    .result-container #result-main-text,
+    #result-container .score,
+    #result-container #score-text,
+    #result-container .score-text,
+    #result-container .final-score,
+    #result-container #final-score,
+    #result-container .result-score,
+    #result-container #result-score,
+    #result-container .result-summary,
+    #result-container #result-summary,
+    #result-container .result-main,
+    #result-container #result-main,
+    #result-container .result-main-text,
+    #result-container #result-main-text {
+        font-size: 20px !important;
+        line-height: 1.35 !important;
+    }
+}
+.info-accordion {
+    margin-top: 22px;
+    text-align: left;
+}
+
+.acc-toggle {
+    width: 100%;
+    padding: 16px 18px;
+    background-color: var(--surface-soft);
+    border: 1px solid var(--border-soft);
+    border-radius: var(--radius-md);
+    font-size: 15px;
+    font-weight: 800;
+    color: var(--text-main);
+    cursor: pointer;
+    text-align: left;
+    margin-bottom: 8px;
+}
+
+.acc-panel {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease;
+    padding: 0 18px;
+    color: var(--text-sub);
+    font-size: 14.5px;
+    line-height: 1.7;
+}
+
+.acc-panel.open {
+    max-height: 1200px;
+    padding: 14px 18px 20px;
+    margin-bottom: 10px;
+    background-color: var(--surface);
+    border-radius: var(--radius-md);
+}
+.pinyin-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.speak-btn {
+    padding: 6px 16px;
+    font-size: 20px;
+    border: none;
+    border-radius: 999px;
+    background: linear-gradient(135deg, var(--primary, #8B3A3A), var(--primary-dark, #6B2C2C));
+    color: #fff;
+    cursor: pointer;
+    box-shadow: var(--shadow-button, 0 3px 8px rgba(0,0,0,0.15));
+    transition: transform 0.15s ease;
+}
+
+.speak-btn:hover { transform: scale(1.08); }
+.speak-btn:active { transform: scale(0.92); }
+
+/* ===== 시작 화면 ===== */
+.start-screen {
+    text-align: center;
+    padding: 50px 24px;
+}
+
+.start-emoji {
+    font-size: 56px;
+    margin-bottom: 12px;
+    animation: floatEmoji 2.2s ease-in-out infinite;
+}
+
+@keyframes floatEmoji {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-8px); }
+}
+
+.start-title {
+    font-size: 24px;
+    font-weight: 800;
+    margin-bottom: 14px;
+    color: var(--primary-dark, #6B2C2C);
+}
+
+.start-desc {
+    font-size: 15px;
+    line-height: 1.7;
+    color: #6b6b6b;
+    margin-bottom: 30px;
+}
+
+.start-btn {
+    display: inline-block;
+    padding: 16px 48px;
+    font-size: 19px;
+    font-weight: 800;
+    color: #fff;
+    border: none;
+    border-radius: 999px;
+    background: linear-gradient(135deg, var(--primary, #8B3A3A), var(--primary-dark, #6B2C2C));
+    box-shadow: 0 8px 20px rgba(139, 58, 58, 0.35);
+    cursor: pointer;
+    transition: transform 0.18s ease, box-shadow 0.18s ease;
+    animation: pulseBtn 1.8s ease-in-out infinite;
+}
+
+.start-btn:hover {
+    transform: translateY(-2px) scale(1.03);
+    box-shadow: 0 10px 24px rgba(139, 58, 58, 0.45);
+}
+
+.start-btn:active {
+    transform: scale(0.95);
+}
+
+@keyframes pulseBtn {
+    0%, 100% { box-shadow: 0 8px 20px rgba(139, 58, 58, 0.35); }
+    50% { box-shadow: 0 8px 28px rgba(139, 58, 58, 0.55); }
+}
+
+/* ===== 병음 + 스피커 버튼 가로 배치 ===== */
+.pinyin-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.speak-btn {
+    padding: 6px 16px;
+    font-size: 20px;
+    border: none;
+    border-radius: 999px;
+    background: linear-gradient(135deg, var(--primary, #8B3A3A), var(--primary-dark, #6B2C2C));
+    color: #fff;
+    cursor: pointer;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.15);
+    transition: transform 0.15s ease;
+}
+
+.speak-btn:hover { transform: scale(1.08); }
+.speak-btn:active { transform: scale(0.92); }
+.note-speak-btn {
+    margin-left: 6px;
+    padding: 2px 9px;
+    font-size: 14px;
+    border: none;
+    border-radius: 999px;
+    background: linear-gradient(135deg, var(--primary, #8B3A3A), var(--primary-dark, #6B2C2C));
+    color: #fff;
+    cursor: pointer;
+    vertical-align: middle;
+    transition: transform 0.12s ease;
+}
+
+.note-speak-btn:hover { transform: scale(1.1); }
+.note-speak-btn:active { transform: scale(0.9); }
+
+.final-score-simple {
+    font-size: 27px;
+    font-weight: 800;
+    color: #D32F2F;
+    text-align: center;
+    margin: 16px 0 24px 0;
+}
+.correct-title {
+    margin-top: 28px !important;
+}
+/* ===== "60초 타임어택" 제목 위아래로 천천히 흔들림 ===== */
+.start-title-float {
+    animation: floatTitle 2.6s ease-in-out infinite;
+}
+
+@keyframes floatTitle {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-8px); }
+}

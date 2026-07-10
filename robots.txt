@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://chinese-word-quiz.netlify.app/sitemap.xml
