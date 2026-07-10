@@ -1091,7 +1091,10 @@ const quizData = [
 
 
 // =======================================================
-// 2. 타임어택 및 카톡 강제 소환 시스템 (절대 수정 금지)
+// 2. 타임어택 시스템
+// [수정] 다음자(多音字) 발음 문제는 mp3 파일 방식으로 해결되어
+// 더 이상 단어를 제외할 필요가 없으므로, 필터를 제거하고
+// quizData 1,000단어 전체를 사용하도록 복원했습니다.
 // =======================================================
 let shuffledQuestions = []; 
 let currentIdx = 0;
@@ -1106,24 +1109,11 @@ let currentCorrectText = "";
 let timeLeft = 60;
 let timerInterval = null;
 
-
-let currentHanzi = ""; // ★ 추가: 현재 문제의 한자를 저장해서 발음재생에 사용
-
-
-// =======================================================
-// 발음이 여러 개인 다음자(多音字) 단어는 화면 병음과
-// 실제 소리가 어긋나는 문제가 있어 퀴즈에서 완전히 제외합니다.
-// =======================================================
-const EXCLUDED_HANZI = [
-    "还", "重", "长", "行", "地", "了", "得", "觉",
-    "教", "差", "空", "只", "都", "为", "分", "干",
-    "会", "乐", "少", "好", "着", "发", "种", "兴",
-    "假", "便", "累"
-];
+let currentHanzi = ""; // 현재 문제의 한자를 저장해서 발음재생에 사용
 
 function shuffleQuestions() {
-    // quizData에서 다음자 단어를 제외한 목록으로 섞기 시작
-    shuffledQuestions = quizData.filter(item => !EXCLUDED_HANZI.includes(item.hanzi));
+    // ✅ 더 이상 다음자 필터링 없이 quizData 전체를 사용합니다.
+    shuffledQuestions = [...quizData];
 
     for (let i = shuffledQuestions.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
@@ -1161,8 +1151,8 @@ function loadQuiz() {
     const currentQuiz = shuffledQuestions[currentIdx];
     document.getElementById('pinyin').innerHTML = `<div>${currentQuiz.pinyin}</div>`;
     
-    currentHanzi = currentQuiz.hanzi;   // ★ 추가
-    speakChinese(currentQuiz.hanzi);    // ★ 추가 
+    currentHanzi = currentQuiz.hanzi;
+    speakChinese(currentQuiz.hanzi);
 
     currentCorrectText = currentQuiz.options[currentQuiz.correct];
 
@@ -1183,10 +1173,7 @@ function loadQuiz() {
 }
 
 // =======================================================
-// [수정] 오답 선택 시 정답이 여유롭게 깜빡인 뒤 다음 문제로 이동
-// 정답을 맞혔을 때는 기존처럼 0.5초 후 바로 다음 문제로 넘어가지만,
-// 오답을 선택했을 때는 정답 버튼이 0.6초 간격으로 깜빡여서
-// 학습자가 정답을 눈으로 확인하고 암기할 시간을 벌어줍니다.
+// 오답 선택 시 정답이 여유롭게 깜빡인 뒤 다음 문제로 이동
 // =======================================================
 function checkAnswer(selectedIdx) {
     if (!isClickable || timeLeft <= 0) return;
@@ -1199,7 +1186,6 @@ function checkAnswer(selectedIdx) {
     totalSolved++;
 
     if (selectedText === currentCorrectText) {
-        // ✅ 정답을 맞힌 경우: 초록색 표시 후 0.5초 뒤 바로 다음 문제로 이동
         selectedButton.classList.add('correct');
         score++;
 
@@ -1217,7 +1203,6 @@ function checkAnswer(selectedIdx) {
         }, 500);
 
     } else {
-        // ❌ 오답을 선택한 경우: 오답 버튼은 빨갛게, 정답 버튼은 여러 번 깜빡이게 처리
         selectedButton.classList.add('wrong');
 
         let correctButton = null;
@@ -1235,7 +1220,7 @@ function checkAnswer(selectedIdx) {
 
         if (correctButton) {
             let blinkCount = 0;
-            const maxBlinks = 6; // 켜짐+꺼짐을 한 세트로 보면 총 3회 깜빡임
+            const maxBlinks = 6;
             const blinkTimer = setInterval(() => {
                 if (blinkCount % 2 === 0) {
                     correctButton.classList.add('correct');
@@ -1246,9 +1231,8 @@ function checkAnswer(selectedIdx) {
 
                 if (blinkCount >= maxBlinks) {
                     clearInterval(blinkTimer);
-                    correctButton.classList.add('correct'); // 마지막엔 항상 켜진 채로 마무리
+                    correctButton.classList.add('correct');
 
-                    // 깜빡임이 끝난 뒤 학습자가 잠깐 더 볼 수 있게 0.4초 대기 후 다음 문제로 이동
                     setTimeout(() => {
                         if (timeLeft > 0) {
                             currentIdx++;
@@ -1256,7 +1240,7 @@ function checkAnswer(selectedIdx) {
                         }
                     }, 400);
                 }
-            }, 600); // 0.6초 간격으로 느리게 깜빡임
+            }, 600);
         }
     }
 }
@@ -1303,7 +1287,6 @@ function endGame() {
 
 
 function restartQuiz() {
-    // 1️⃣ 모든 점수와 기록 데이터를 처음 상태(0, 빈 배열)로 완전히 초기화합니다.
     score = 0;
     totalSolved = 0;
     currentIdx = 0;
@@ -1311,29 +1294,24 @@ function restartQuiz() {
     correctAnswers = [];
     isClickable = false;
 
-    // 2️⃣ 결과 화면(result-card)은 숨기고, 퀴즈 화면(quiz-card)을 다시 보여줍니다.
     const resultCard = document.getElementById('result-card');
     const quizCard = document.getElementById('quiz-card');
     if (resultCard) resultCard.style.display = 'none';
     if (quizCard) quizCard.style.display = 'block';
 
-    // 3️⃣ 문제 순서를 새로 섞고, 60초 타이머를 처음부터 다시 가동합니다.
     shuffleQuestions();
     startTimer();
 
-    // 4️⃣ 첫 번째 문제를 화면에 불러옵니다.
     loadQuiz();
 }
 
 // =======================================================
-// 3. 카카오톡 "내 점수 자랑하기" 공유 기능
-// (모바일 카톡 먹통 버그 해결판: 클립보드 우선 복사 + 카톡 앱 단순 실행)
+// 3. 카카오톡 "내 점수 자랑하기" 공유 기능 (수정 없음, 그대로 유지)
 // =======================================================
 function copyScoreToClipboard() {
     const currentUrl = window.location.href;
     const scoreText = document.getElementById('score-text').innerText || '0';
 
-    // 1️⃣ 전처리 세척 함수: 카톡 인코딩 오류를 유발하는 특수문자를 미리 청소합니다.
     function sanitizeText(text) {
         return String(text).replace(/·/g, ' ').trim();
     }
@@ -1344,7 +1322,6 @@ function copyScoreToClipboard() {
     let shareMessage = `${shareTitle}\n\n나 방금 60초 동안 중국어 단어 ${cleanScore}문제 맞혔어! 🔥\n너도 내 기록 깨러 도전해봐! 👇\n${currentUrl}`;
     shareMessage = sanitizeText(shareMessage);
 
-    // 2️⃣ 클립보드 복사를 먼저 확실하게 처리하는 함수 (최신 방식 + 구형 대체 방식 이중 안전장치)
     function copyTextRobust(text) {
         if (navigator.clipboard && navigator.clipboard.writeText) {
             navigator.clipboard.writeText(text).catch(() => fallbackCopy(text));
@@ -1364,35 +1341,68 @@ function copyScoreToClipboard() {
         document.body.removeChild(dummyInput);
     }
 
-    // 3️⃣ 텍스트를 클립보드에 먼저 복사합니다. (길이/특수문자 무관하게 100% 성공)
     copyTextRobust(shareMessage);
 
     const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
 
     if (isMobile) {
-        // 4️⃣ 카톡 앱을 "실행만" 시킵니다. (텍스트를 URL에 실어보내지 않아 먹통 문제 없음)
         alert("점수와 링크가 복사되었습니다! 📋\n곧 열리는 카카오톡 채팅방에 '붙여넣기'만 눌러주세요!");
         window.location.href = "kakaotalk://";
     } else {
-        // PC 환경: 클립보드 복사로 대체
         alert("PC 환경입니다! 점수와 링크가 복사되었습니다. 📋\n카톡방에 붙여넣기(Ctrl+V)해서 자랑해 보세요!");
     }
 }
 
 // =======================================================
-// 4. 카카오톡 공유 버튼 연결 다리
-// HTML 버튼이 호출하는 이름(shareToKakao)과
-// 실제 기능 함수 이름(copyScoreToClipboard)을 서로 연결해줍니다.
+// 4. 카카오톡 공유 버튼 연결 다리 (수정 없음)
 // =======================================================
 function shareToKakao() {
     copyScoreToClipboard();
 }
 
 // =======================================================
-// 5. 오답노트/정답노트 글씨 크게 만들기
-// 기존 style.css 파일은 전혀 건드리지 않고,
-// 페이지가 열릴 때 자동으로 더 큰 글씨 스타일을 덧씌웁니다.
+// 8. 중국어 한자 전용 웹폰트 적용 (Noto Sans SC)
+// 시스템 폰트마다 한자 Bold(굵기) 지원 여부가 달라서
+// 일부 한자만 얇게 보이던 문제를 해결합니다.
+// 폰트 파일을 구글 서버가 아닌 우리 서버(fonts 폴더)에서
+// 직접 불러오기 때문에, 로딩 속도와 안정성이 모두 확보됩니다.
 // =======================================================
+(function injectChineseFont() {
+    const fontStyleTag = document.createElement('style');
+    fontStyleTag.innerHTML = `
+        @font-face {
+            font-display: swap;
+            font-family: 'Noto Sans SC';
+            font-style: normal;
+            font-weight: 400;
+            src: url('fonts/noto-sans-sc-v40-chinese-simplified_latin_latin-ext-regular.woff2') format('woff2');
+        }
+        @font-face {
+            font-display: swap;
+            font-family: 'Noto Sans SC';
+            font-style: normal;
+            font-weight: 700;
+            src: url('fonts/noto-sans-sc-v40-chinese-simplified_latin_latin-ext-700.woff2') format('woff2');
+        }
+
+        /* ★ 한자/병음이 표시되는 모든 요소에 새 폰트를 적용합니다. */
+        #pinyin,
+        .option-btn,
+        .wrong-pinyin,
+        .wrong-meaning {
+            font-family: 'Noto Sans SC', "Malgun Gothic", "Apple SD Gothic Neo", sans-serif !important;
+        }
+    `;
+    document.head.appendChild(fontStyleTag);
+})();
+
+
+// =======================================================
+// 5. 오답노트/정답노트 글씨 크게 만들기 (수정 없음)
+// =======================================================
+
+
+
 (function injectBiggerNoteStyle() {
     const styleTag = document.createElement('style');
     styleTag.innerHTML = `
@@ -1420,15 +1430,9 @@ function shareToKakao() {
 })();
 
 // =======================================================
-// 6. 오답노트 + 정답노트 카카오톡 공유
-// (모바일 먹통 버그 해결판: 클립보드 우선 복사 + 카톡 앱 단순 실행)
-// 문제 수가 많아지면 텍스트가 길어져서 카톡 링크 방식(kakaolink://send)이
-// 실패하는 것을 막기 위해, 텍스트를 클립보드에 먼저 확실히 복사한 뒤
-// 카톡 앱만 단순히 실행시키는 방식으로 변경했습니다.
-// 이렇게 하면 텍스트 길이에 상관없이 100% 안정적으로 작동합니다.
+// 6. 오답노트 + 정답노트 카카오톡 공유 (수정 없음)
 // =======================================================
 function shareNotesToKakao() {
-    // 카톡 인코딩 오류를 막기 위한 특수문자 세척 함수
     function sanitizeText(text) {
         return String(text).replace(/·/g, ' ').trim();
     }
@@ -1453,7 +1457,6 @@ function shareNotesToKakao() {
 
     noteMessage = sanitizeText(noteMessage);
 
-    // 1️⃣ 클립보드 복사를 먼저 확실하게 처리하는 함수 (최신 방식 + 구형 대체 방식 이중 안전장치)
     function copyTextRobust(text) {
         if (navigator.clipboard && navigator.clipboard.writeText) {
             navigator.clipboard.writeText(text).catch(() => fallbackCopy(text));
@@ -1473,83 +1476,66 @@ function shareNotesToKakao() {
         document.body.removeChild(dummyInput);
     }
 
-    // 2️⃣ 텍스트를 클립보드에 먼저 복사합니다. (길이가 길어도 100% 성공)
     copyTextRobust(noteMessage);
 
     const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
 
     if (isMobile) {
-        // 3️⃣ 카톡 앱을 "실행만" 시킵니다. (텍스트를 URL에 실어보내지 않아서 길이 제한 문제가 없음)
         alert("오답/정답 노트가 복사되었습니다! 📋\n곧 열리는 카카오톡 채팅방에 '붙여넣기'만 눌러주세요!");
         window.location.href = "kakaotalk://";
     } else {
-        // PC 환경: 복사만 안내
         alert("PC 환경입니다! 오답/정답 노트가 복사되었습니다. 📋\n카톡방에 붙여넣기(Ctrl+V)해서 공유해 보세요!");
     }
 }
+
 function toggleAcc(btn) {
     const panel = btn.nextElementSibling;
     panel.classList.toggle('open');
 }
+
 // =======================================================
-// 7. 중국어 발음 재생 기능 (Web Speech API, 서버/비용 없음)
-// [모바일 대응 강화판] 안드로이드/아이폰 음성엔진 먹통 버그 수정
+// 7. 중국어 발음 재생 기능
+// [수정] 브라우저 TTS(Web Speech API) 대신, 미리 생성해둔
+// mp3 파일(audio 폴더)을 직접 재생하는 방식으로 교체했습니다.
+// → 안드로이드 언어팩 미설치, 카톡 인앱 브라우저 먹통,
+//    기기별 목소리 차이 문제가 전부 원천적으로 사라집니다.
+// 혹시 특정 단어의 mp3 파일이 누락되어 있어도 자동으로
+// 기존 브라우저 TTS로 안전하게 대체되도록 안전장치를 넣었습니다.
 // =======================================================
-let zhVoice = null;
-let currentUtterance = null; // ★ 발화 중 GC(가비지 컬렉션) 방지용 전역 참조 (아이폰 대응)
-
-function initVoices() {
-    const voices = speechSynthesis.getVoices();
-    zhVoice = voices.find(v => v.lang === 'zh-CN') || voices.find(v => v.lang.includes('zh')) || null;
-}
-
-if ('speechSynthesis' in window) {
-    initVoices();
-    speechSynthesis.onvoiceschanged = initVoices;
-    // ★ 일부 안드로이드 기기는 onvoiceschanged 이벤트가 발생하지 않으므로
-    //    강제로 한 번 더 재조회합니다.
-    setTimeout(initVoices, 500);
-    setTimeout(initVoices, 1500);
-
-    // ★ 안드로이드 크롬에서 발화가 길어지면 자동으로 일시정지(pause)되는
-    //    버그가 있어, 주기적으로 강제 재개(resume)시켜줍니다.
-    setInterval(() => {
-        if (speechSynthesis.speaking && speechSynthesis.paused) {
-            speechSynthesis.resume();
-        }
-    }, 4000);
-}
+let currentAudio = null;
 
 function speakChinese(hanzi) {
-    if (!('speechSynthesis' in window) || !hanzi) return;
+    if (!hanzi) return;
 
-    speechSynthesis.cancel();
+    // 이전에 재생 중이던 소리는 정지
+    if (currentAudio) {
+        currentAudio.pause();
+        currentAudio.currentTime = 0;
+    }
 
-    // ★ 핵심 수정: cancel() 직후 바로 speak()를 호출하면 모바일에서
-    //    음성엔진이 응답하지 않는 버그가 있어, 아주 짧은 지연을 줍니다.
-    setTimeout(() => {
-        const utterance = new SpeechSynthesisUtterance(hanzi);
-        utterance.lang = 'zh-CN';
-        if (zhVoice) utterance.voice = zhVoice;
-        utterance.rate = 0.85;
-        utterance.pitch = 1;
+    const audioPath = `audio/${hanzi}.mp3`;
+    currentAudio = new Audio(audioPath);
 
-        currentUtterance = utterance; // GC 방지용 전역 보관
-
-        speechSynthesis.speak(utterance);
-    }, 120);
+    currentAudio.play().catch((err) => {
+        console.warn(`⚠️ mp3 재생 실패 (${hanzi}), 브라우저 TTS로 대체합니다.`, err);
+        if ('speechSynthesis' in window) {
+            speechSynthesis.cancel();
+            const utterance = new SpeechSynthesisUtterance(hanzi);
+            utterance.lang = 'zh-CN';
+            utterance.rate = 0.85;
+            speechSynthesis.speak(utterance);
+        }
+    });
 }
 
-// 아이폰 소리 재생 제한을 풀어주는 함수 (index.html에서 첫 클릭 시 자동 호출됨)
+// 아이폰/모바일 브라우저의 소리 재생 제한을 풀어주는 함수
+// (index.html에서 사용자의 첫 클릭 시 자동으로 호출됨)
 function unlockAudio() {
-    if (!('speechSynthesis' in window)) return;
-    // ★ 완전한 빈 문자열('')은 일부 iOS 버전에서 무시되므로 공백 하나로 대체
-    const dummy = new SpeechSynthesisUtterance(' ');
-    dummy.volume = 0;
-    speechSynthesis.speak(dummy);
+    const dummy = new Audio();
+    dummy.play().catch(() => {}); // 무음이라도 한 번 재생 시도해서 잠금 해제
 }
 
-// 🔊 수동 버튼 클릭 시 호출되는 함수
+// 🔊 수동 재생 버튼 클릭 시 호출되는 함수
 function playCurrentSound() {
     speakChinese(currentHanzi);
 }

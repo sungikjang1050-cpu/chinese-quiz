@@ -3,9 +3,54 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>중국어 1000단어 퀴즈</title>
+
+    <!-- ============ SEO 필수 태그 ============ -->
+    <title>중국어 1000단어 퀴즈 | 60초 타임어택 발음 학습</title>
+    <meta name="description" content="60초 안에 중국어 1000단어를 맞춰보세요! 정답을 맞힐 때마다 정확한 중국어 발음(핀인)이 자동으로 들려주는 무료 중국어 단어 퀴즈 게임입니다. HSK 급수 대비 및 중국어 초보 학습에 최적화되어 있습니다.">
+    <meta name="keywords" content="중국어 단어, 중국어 퀴즈, 중국어 발음, HSK 단어, 중국어 공부, 핀인 학습, 타임어택 퀴즈">
+    <link rel="canonical" href="https://sungikjang1050-cpu.github.io/chinese-quiz/">
+
+    <!-- ============ 카카오톡/페이스북 공유 미리보기 (Open Graph) ============ -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="중국어 1000단어 퀴즈 | 60초 타임어택">
+    <meta property="og:description" content="60초 동안 최대한 많은 중국어 단어를 맞혀보세요! 정답을 맞힐 때마다 정확한 발음이 자동으로 들려옵니다.">
+    <meta property="og:url" content="https://sungikjang1050-cpu.github.io/chinese-quiz/">
+    <meta property="og:image" content="https://sungikjang1050-cpu.github.io/chinese-quiz/thumbnail.png">
+    <meta property="og:locale" content="ko_KR">
+
+    <!-- 카카오톡은 og:image가 없으면 미리보기 자체가 안 뜹니다 -->
+
+   <script>
+    // =======================================================
+    // 카카오톡 인앱 브라우저 감지 → 자동으로 외부 브라우저(크롬/사파리)로 이동
+    // 카톡 자체 브라우저는 음성 재생(TTS) 기능이 제한되어 있어
+    // 반드시 외부 브라우저로 빠져나가야 정상 작동합니다.
+    // =======================================================
+    (function redirectFromKakaoInApp() {
+        const userAgent = navigator.userAgent.toLowerCase();
+        const isKakaoInApp = userAgent.includes('kakaotalk');
+
+        if (!isKakaoInApp) return; // 카톡 인앱이 아니면 아무것도 안 함
+
+        const currentUrl = window.location.href;
+        const isAndroid = /android/i.test(userAgent);
+        const isIOS = /iphone|ipad|ipod/i.test(userAgent);
+
+        if (isAndroid) {
+            // 안드로이드: 크롬으로 강제 실행 (intent 스킴)
+            const intentUrl = "intent://" + currentUrl.replace(/https?:\/\//, '') +
+                "#Intent;scheme=https;package=com.android.chrome;end";
+            window.location.href = intentUrl;
+        } else if (isIOS) {
+            // 아이폰: 카카오가 공식 제공하는 외부 브라우저(사파리) 오픈 스킴
+            window.location.href = "kakaotalk://web/openExternal?url=" + encodeURIComponent(currentUrl);
+        }
+    })();
+</script>
+
     <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
     <div class="quiz-container">
         <h1 class="quiz-title">중국어 1000단어 퀴즈</h1>
