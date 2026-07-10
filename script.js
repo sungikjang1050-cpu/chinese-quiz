@@ -1491,44 +1491,60 @@ function toggleAcc(btn) {
     const panel = btn.nextElementSibling;
     panel.classList.toggle('open');
 }
-
 // =======================================================
 // 7. 중국어 발음 재생 기능 (Web Speech API, 서버/비용 없음)
+// [모바일 대응 강화판] 안드로이드/아이폰 음성엔진 먹통 버그 수정
 // =======================================================
 let zhVoice = null;
+let currentUtterance = null; // ★ 발화 중 GC(가비지 컬렉션) 방지용 전역 참조 (아이폰 대응)
 
 function initVoices() {
     const voices = speechSynthesis.getVoices();
-    zhVoice = voices.find(v => v.lang.includes('zh')) || null;
+    zhVoice = voices.find(v => v.lang === 'zh-CN') || voices.find(v => v.lang.includes('zh')) || null;
 }
 
 if ('speechSynthesis' in window) {
-    speechSynthesis.onvoiceschanged = initVoices;
     initVoices();
+    speechSynthesis.onvoiceschanged = initVoices;
+    // ★ 일부 안드로이드 기기는 onvoiceschanged 이벤트가 발생하지 않으므로
+    //    강제로 한 번 더 재조회합니다.
+    setTimeout(initVoices, 500);
+    setTimeout(initVoices, 1500);
+
+    // ★ 안드로이드 크롬에서 발화가 길어지면 자동으로 일시정지(pause)되는
+    //    버그가 있어, 주기적으로 강제 재개(resume)시켜줍니다.
+    setInterval(() => {
+        if (speechSynthesis.speaking && speechSynthesis.paused) {
+            speechSynthesis.resume();
+        }
+    }, 4000);
 }
 
-function speakChinese(hanzi, correctPinyin) {
+function speakChinese(hanzi) {
     if (!('speechSynthesis' in window) || !hanzi) return;
+
     speechSynthesis.cancel();
 
-    // 1차: 보정 사전에 있으면 대체 단어로, 없으면 원문 그대로
-    const textToSpeak = hanzi;
+    // ★ 핵심 수정: cancel() 직후 바로 speak()를 호출하면 모바일에서
+    //    음성엔진이 응답하지 않는 버그가 있어, 아주 짧은 지연을 줍니다.
+    setTimeout(() => {
+        const utterance = new SpeechSynthesisUtterance(hanzi);
+        utterance.lang = 'zh-CN';
+        if (zhVoice) utterance.voice = zhVoice;
+        utterance.rate = 0.85;
+        utterance.pitch = 1;
 
+        currentUtterance = utterance; // GC 방지용 전역 보관
 
-    const utterance = new SpeechSynthesisUtterance(textToSpeak);
-    utterance.lang = 'zh-CN';
-    if (zhVoice) utterance.voice = zhVoice;
-    utterance.rate = 0.85;
-    utterance.pitch = 1;
-
-    speechSynthesis.speak(utterance);
+        speechSynthesis.speak(utterance);
+    }, 120);
 }
-
 
 // 아이폰 소리 재생 제한을 풀어주는 함수 (index.html에서 첫 클릭 시 자동 호출됨)
 function unlockAudio() {
     if (!('speechSynthesis' in window)) return;
-    const dummy = new SpeechSynthesisUtterance('');
+    // ★ 완전한 빈 문자열('')은 일부 iOS 버전에서 무시되므로 공백 하나로 대체
+    const dummy = new SpeechSynthesisUtterance(' ');
     dummy.volume = 0;
     speechSynthesis.speak(dummy);
 }
